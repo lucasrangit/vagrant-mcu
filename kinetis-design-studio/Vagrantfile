@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Bento boxes are recommended by Vagrant, headless, and don't have the shared folder issue
+  config.vm.box = "bento/ubuntu-16.04"
+
+  # Forward X11
+  config.ssh.forward_x11 = true
+
+  # Share host downloads directory to serve as a cache.
+  config.vm.synced_folder "~/Downloads", "/vagrant_data"
+
+  # TODO add VirtualBox support
+  config.vm.provider "vmware_workstation" do |vb|
+    # Customize the amount of memory on the VM:
+    vb.memory = "1024"
+
+    # Enable USB 2.0
+    vb.vmx["usb.present"] = "TRUE"
+    vb.vmx["usb.generic.autoconnect"] = "FALSE"
+    vb.vmx["ehci.present"] = "TRUE"
+
+    # Auto-connect USB development devices
+    vb.vmx["usb.autoConnect.device0"] = "0x1366:0x1015"
+  end
+
+  # Enable provisioning with a shell script.
+  config.vm.provision "shell", inline: <<-SHELL
+    # Disable frontend in debconf, prevent interactive to access stdin
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+
+    # X11 client only (include xterm to get other deps)
+    apt-get install -y xauth xterm
+
+    apt-get install -y unzip
+
+    # Grant access to USB to serial adapters and the like
+    usermod -G dialout vagrant
+  SHELL
+
+  config.vm.provision "shell", path: "setup.sh"
+end
