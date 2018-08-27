@@ -58,7 +58,7 @@ fi
 
 # TODO build sample project
 #/usr/local/mcuxpressoide/ide/mcuxpressoide -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -data /vagrant/workspace
-#sudo -u vagrant /usr/local/mcuxpressoide/ide/mcuxpressoide -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import "/home/vagrant/mcuxpresso/01/SDKPackages/${SDK}/boards/frdmk22f/demo_apps/hello_world/" -data "${WORKSPACE_PATH}"
+#sudo -u vagrant /usr/local/mcuxpressoide/ide/mcuxpressoide -nosplash --launcher.suppressErrors -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import "/home/vagrant/mcuxpresso/01/SDKPackages/${SDK}/boards/frdmk22f/demo_apps/hello_world/" -data "${WORKSPACE_PATH}"
 
 exit 0
 
