@@ -42,6 +42,13 @@ if [[ ! -d "${WORKSPACE_PATH}" ]]; then
 	mkdir "${WORKSPACE_PATH}"
 fi
 
+# Disable Welcome Page display
+sudo -u vagrant mkdir -p ${WORKSPACE_PATH}/.metadata/.plugins/org.eclipse.core.runtime/.settings
+sudo -u vagrant cat > ${WORKSPACE_PATH}/.metadata/.plugins/org.eclipse.core.runtime/.settings/com.crt.utils.prefs << EOF
+eclipse.preferences.version=1
+showWelcomeView=false
+EOF
+
 #
 # Install SDK
 #
