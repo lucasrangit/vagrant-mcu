@@ -36,10 +36,10 @@ dpkg-divert --remove --rename /bin/whiptail
 
 echo 'PATH="/usr/local/mcuxpressoide/ide:$PATH"' >> "/home/vagrant/.profile"
 
-WORKSPACE_PATH="/vagrant/workspace"
+WORKSPACE_PATH="/home/vagrant/workspace"
 
 if [[ ! -d "${WORKSPACE_PATH}" ]]; then
-	mkdir "${WORKSPACE_PATH}"
+	sudo -u vagrant mkdir "${WORKSPACE_PATH}"
 fi
 
 # Disable Welcome Page display
