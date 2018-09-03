@@ -34,6 +34,10 @@ ln -s /bin/true /bin/whiptail
 rm /bin/whiptail
 dpkg-divert --remove --rename /bin/whiptail
 
+# Install Additional Dependencies
+# resolves warning: 'Gtk-Message: Failed to load module "canberra-gtk-module"'
+apt install libcanberra-gtk-module
+
 echo 'PATH="/usr/local/mcuxpressoide/ide:$PATH"' >> "/home/vagrant/.profile"
 
 WORKSPACE_PATH="/home/vagrant/workspace"
