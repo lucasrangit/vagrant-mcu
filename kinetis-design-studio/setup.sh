@@ -19,7 +19,7 @@ INSTALLER_MD5="725c367fbc40b7d5b4285290eef5f3db"
 
 DATA_DIR="/vagrant_data"
 
-WORKSPACE_PATH="/vagrant/workspace"
+WORKSPACE_PATH="/home/vagrant/workspace"
 
 if [[ ! -d "${DATA_DIR}" ]]; then
 	echo "No data directory" >&2
