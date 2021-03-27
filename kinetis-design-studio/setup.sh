@@ -5,12 +5,26 @@
 set -x
 set -e
 
-function md5check() {
-	if [[ "$(md5sum "${1}" | awk '{ print $1 }')" != "${2}" ]]; then
+# $1 URL
+# $2 output file
+# $3 md5sum (optional)
+function dl() {
+	wget --quiet --continue --output-document="${2}" "${1}"
+	if [[ $? -ne 0 ]]; then
+		echo "${INSTALLER} wget error code: $?" >&2
+		return 1
+	fi
+
+	if [[ "$#" -eq 2 ]]; then
 		return 0
 	fi
 
-	return 1
+	if [[ "$(md5sum "${2}" | awk '{ print $1 }')" != "${3}" ]]; then
+		echo "${INSTALLER} checksum mismatch" >&2
+		return 1
+	fi
+
+	return 0
 }
 
 INSTALLER="kinetis-design-studio_3.2.0-1_amd64.deb"
@@ -30,10 +44,8 @@ fi
 # Install KDS
 #
 
-wget --quiet --continue --output-document="${DATA_DIR}/${INSTALLER}" "${INSTALLER_URL}"
-
-if md5check "${DATA_DIR}/${INSTALLER}" "${INSTALLER_MD5}"; then
-	echo "${INSTALLER} checksum mismatch" >&2
+if ! dl "${INSTALLER_URL}" "${DATA_DIR}/${INSTALLER}" "${INSTALLER_MD5}"; then
+	echo "${INSTALLER} download failed" >&2
 	exit 1
 fi
 
@@ -45,7 +57,10 @@ apt-get install -y libgtk2.0-0
 # arm-none-eabi-gcc dependency
 apt-get install -y lib32z1 lib32ncurses5
 
-dpkg -i "${DATA_DIR}/${INSTALLER}"
+# BUG in 3.2.0 installing over itself deletes itself
+if ! dpkg -l kinetis-design-studio; then
+	dpkg -i "${DATA_DIR}/${INSTALLER}"
+fi
 
 echo 'PATH="/opt/Freescale/KDS_v3/eclipse:$PATH"' >> "/home/vagrant/.profile"
 
@@ -61,14 +76,12 @@ SDK_URL="https://mcuxpresso.nxp.com/en/download?hash=a3b2581033aca15492983bd6722
 SDK_MD5="df7045fd0a7f694ced73826beeb10d91"
 SDK_PATH="/opt/Freescale/${SDK}"
 
-wget --quiet --continue --output-document="${DATA_DIR}/${SDK_FILE}" "${SDK_URL}"
-
-if md5check "${DATA_DIR}/${SDK_FILE}" "${SDK_MD5}"; then
-	echo "${SDK_FILE} checksum mismatch" >&2
+if ! dl "${SDK_URL}" "${DATA_DIR}/${SDK_FILE}" "${SDK_MD5}"; then
+	echo "${SDK_FILE} download failed" >&2
 	exit 1
 fi
 
-mkdir "${SDK_PATH}"
+mkdir "${SDK_PATH}" || true
 tar -xa --directory "${SDK_PATH}" -f "${DATA_DIR}/${SDK_FILE}"
 # make read/write by user so that demo projects can be built (they cannot be copied due to linked resources)
 chown -R vagrant. "${SDK_PATH}"
@@ -81,7 +94,10 @@ DEMO="bubble"
 DEMO_FILE="${DEMO}.zip"
 DEMO_URL="https://mcuxpresso.nxp.com/en/download?hash=ce7b48a4b898e8f45cafe9979e5befe5&uvid=None&agree=true&pg=download&auto=1&dl=1&js=1"
 
-wget --quiet --continue --output-document="${DATA_DIR}/${DEMO}" "${DEMO_URL}"
+if ! dl "${DEMO_URL}" "${DATA_DIR}/${DEMO_FILE}"; then
+	echo "${DEMO_URL} download failed" >&2
+	exit 1
+fi
 
 # Extract but don't overwrite existing files
 unzip -n -d "/vagrant" "${DATA_DIR}/${DEMO_FILE}"

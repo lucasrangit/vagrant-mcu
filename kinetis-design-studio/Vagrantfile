@@ -6,23 +6,35 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-16.04"
 
   # Forward X11
-  config.ssh.forward_x11 = true
+  config.ssh.forward_x12 = true
 
   # Share host downloads directory to serve as a cache.
   config.vm.synced_folder "~/Downloads", "/vagrant_data"
 
-  # TODO add VirtualBox support
-  config.vm.provider "vmware_workstation" do |vb|
+  # VirtualBox support
+  config.vm.provider "virtualbox" do |vb|
     # Customize the amount of memory on the VM:
     vb.memory = "1024"
 
     # Enable USB 2.0
-    vb.vmx["usb.present"] = "TRUE"
-    vb.vmx["usb.generic.autoconnect"] = "FALSE"
-    vb.vmx["ehci.present"] = "TRUE"
+    vb.customize ["modifyvm", :id, "--usb", "on"]
+    vb.customize ["modifyvm", :id, "--usbehci", "on"]
 
     # Auto-connect USB development devices
-    vb.vmx["usb.autoConnect.device0"] = "0x1366:0x1015"
+    vb.customize ["usbfilter", "add", "0", "--target", :id, '--vendorid', '0x1366', '--productid', '0x1015']
+  end
+
+  # VMware
+  config.vm.provider "vmware_workstation" do |vm|
+    vm.memory = "1024"
+
+    # Enable USB 2.0
+    vm.vmx["usb.present"] = "TRUE"
+    vm.vmx["usb.generic.autoconnect"] = "FALSE"
+    vm.vmx["ehci.present"] = "TRUE"
+
+    # Auto-connect USB development devices
+    vm.vmx["usb.autoConnect.device0"] = "0x1366:0x1015"
   end
 
   # Enable provisioning with a shell script.
